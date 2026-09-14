@@ -1,51 +1,50 @@
-# Lumière Quickstart
+# Lumière + Pedro Pathing Quickstart
 
-A clean robot project for [Lumière](https://github.com/Dillylol/Lumiere), built from the official
-[FIRST Tech Challenge Robot Controller SDK v12.0](https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/tag/v12.0).
+A ready-to-use FTC robot project that combines [Lumière](https://github.com/Dillylol/Lumiere) with the official [Pedro Pathing Quickstart](https://github.com/Pedro-Pathing/Quickstart).
 
-TeamCode starts blank. Create your robot programs in Lumière or Android Studio; no sample OpModes,
-tuning procedures, generated robot code, credentials, or Lumière transport source are copied into
-this repository.
+This project tracks Pedro Quickstart commit [`b431238`](https://github.com/Pedro-Pathing/Quickstart/commit/b4312385b7d0cc5e8dd263ec3927c9ef0cb48f36) and uses FTC SDK 12.0.0. TeamCode contains Pedro's tuning setup and no example autonomous or TeleOp programs, so teams can start their own robot code in Lumière.
 
-## Included libraries
+## Included
 
-Gradle downloads libraries from their official Maven repositories. Feature switches live at the
-bottom of `gradle.properties`:
+- Pedro Pathing 3.0.0 and its official AutoTune 1.0.0 procedures
+- Ivy commands 1.1.1 for Lumière-generated robot programs
+- Panels 1.0.12 for robot telemetry and tuning pages
+- Lumière's robot runtime and desktop simulator 0.1.2
+- FTC SDK 12.0.0 dependencies
 
-| Switch | Default | Adds |
-| --- | --- | --- |
-| `lumiere.pedro` | `true` | Pedro Pathing 3.0.0 and Ivy 1.1.1 |
-| `lumiere.autotune` | `false` | Pedro AutoTune 1.0.0 |
-| `lumiere.panels` | `false` | Panels 1.0.12 |
-| `lumiere.simulator` | `true` | Lumière desktop simulation support for tests |
-
-The small Lumière robot runtime is installed as
-`com.github.Dillylol.Lumiere:ftc-lib:v0.1.2`. Generated projects call its public API; the
-implementation is not duplicated into TeamCode.
+Libraries are downloaded by Gradle. The repository does not copy Lumière's data transport implementation into TeamCode or store robot Wi-Fi passwords, personal tokens, or private signing keys.
 
 ## Start
 
 1. Clone or download this repository.
-2. Open the folder in Lumière and create a program, or open it in Android Studio.
-3. Keep Pedro enabled for Lumière-generated autonomous and TeleOp programs.
-4. Enable AutoTune or Panels only when your team needs them.
-5. Build and deploy through Lumière or run `TeamCode > Tasks > build > assembleDebug` in Android Studio.
+2. Open its top-level folder in Lumière.
+3. Use the Pedro tuning OpModes in the Driver Station to tune the real robot.
+4. Paste the AutoTune result into `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/pedro/Constants.java` through Lumière.
+5. Create autonomous and TeleOp programs in Lumière, then build and deploy them.
 
-The first build downloads the selected dependencies. The app and Android Studio use the same Gradle
-project, and no Lumière account or cloud service is required.
+The default `Constants.java` contains safe placeholder estimates so the project compiles and the simulator can start. Tune the real robot before driving it at normal power.
 
-## Safety
+## App integration
 
-- The project never stores robot Wi-Fi passwords, personal tokens, or private release-signing keys. The standard FTC debug keystore remains unchanged from the official SDK.
-- Lumière can build and install an APK, but OpModes still start from the FTC Driver Station.
-- Test new mechanisms at low power with the robot raised safely before placing it on the field.
-- Only enable libraries you use, and commit `gradle.properties` so every team member builds the same setup.
+Lumière expects the following pieces, all of which are included here:
 
-The untouched FTC SDK readme is available at [doc/FTC_SDK_README.md](doc/FTC_SDK_README.md).
+- a Pedro `Constants.create(HardwareMap)` factory for generated OpModes
+- Pedro and Ivy dependencies for generated paths and commands
+- the Lumière robot runtime for live headings and field data
+- `RunSimulator` plus the simulator test dependency for the desktop simulator
+- the standard FTC Gradle tasks used by Build, Test, and Deploy
 
-## Documentation
+Run a full local check with:
 
-- [Lumière](https://github.com/Dillylol/Lumiere)
+```text
+gradlew.bat :TeamCode:assembleDebug :TeamCode:testDebugUnitTest
+```
+
+On macOS or Linux, use `./gradlew` instead. GitHub Actions runs the same checks after every push.
+
+## Upstream documentation
+
+- [Pedro Pathing documentation](https://pedropathing.com/docs/pathing)
+- [Panels documentation](https://panels.bylazar.com)
 - [FTC documentation](https://ftc-docs.firstinspires.org)
-- [Pedro Pathing](https://pedropathing.com/docs/pathing)
-- [Panels](https://panels.bylazar.com)
+- [Original Pedro Quickstart readme](doc/PEDRO_QUICKSTART_README.md)

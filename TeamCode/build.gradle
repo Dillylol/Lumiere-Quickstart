@@ -28,5 +28,5 @@ dependencies {
     implementation project(':FtcRobotController')
 }
 
-// Lumière and optional robot libraries
+// Pedro Pathing, Panels, and Lumière runtime/simulator
 apply from: 'libraries.gradle'

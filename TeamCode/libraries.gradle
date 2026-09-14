@@ -1,59 +1,52 @@
-// Lumière dependency catalog. Libraries are downloaded from their official repositories; no
-// third-party or Lumière implementation source is copied into TeamCode.
-
-def feature = { String name, boolean fallback ->
-    providers.gradleProperty(name).map { it.toBoolean() }.getOrElse(fallback)
-}
-
-def usePedro = feature('lumiere.pedro', true)
-def useAutoTune = feature('lumiere.autotune', false)
-def usePanels = feature('lumiere.panels', false)
-def useSimulator = feature('lumiere.simulator', true)
+// Libraries used by this robot project, kept separate from the FTC SDK's build.dependencies.gradle
+// so SDK updates can replace that file without losing anything below.
 
 repositories {
     mavenCentral()
     google()
-    maven { url = 'https://jitpack.io' }
-    if (useAutoTune) maven { url = 'https://repo.dairy.foundation/releases/' }
-    if (usePanels) maven { url = 'https://mymaven.bylazar.com/releases' }
-}
-
-if (usePanels) {
-    // Panels uses Android 14 APIs at compile time. The FTC minSdk and targetSdk stay unchanged.
-    android.compileSdkVersion 34
+    maven { url = 'https://repo.dairy.foundation/releases/' } // Pedro Pathing AutoTune dependencies
+    maven { url = 'https://mymaven.bylazar.com/releases' }     // Panels dashboard
+    maven { url = 'https://jitpack.io' }                       // Robot library
 }
 
 android {
+    // Panels depends on Material Components, which must be compiled against Android 14 (API 34).
+    // This only changes the compile-time API level; minSdk and targetSdk stay as the FTC SDK sets them.
+    compileSdkVersion 34
+
     testOptions {
+        // Unit tests and the desktop simulator run FTC SDK classes on this computer.
         unitTests.returnDefaultValues = true
         unitTests.all {
+            // Simulator settings passed by Lumière. The token is passed in the SIM_TOKEN environment variable.
             ['sim.port', 'sim.config'].each { key ->
                 if (project.hasProperty(key)) systemProperty key, project.property(key)
             }
             if (project.hasProperty('sim.port')) {
                 outputs.upToDateWhen { false }
-                testLogging.showStandardStreams = true
+                testLogging {
+                    showStandardStreams = true
+                }
             }
         }
     }
 }
 
 dependencies {
-    if (usePedro) {
-        implementation 'com.pedropathing:revhub:3.0.0'
-        implementation 'com.pedropathing.ivy:core:1.1.1'
-        implementation 'com.pedropathing.ivy:pedro:1.1.1'
-    }
-    if (useAutoTune) implementation 'com.pedropathing:tuning:1.0.0'
-    if (usePanels) implementation 'com.bylazar:fullpanels:1.0.12'
+    // Pedro Pathing path following, AutoTune, and the Ivy command library
+    implementation 'com.pedropathing:revhub:3.0.0'
+    implementation 'com.pedropathing:tuning:1.0.0'
+    implementation 'com.pedropathing.ivy:core:1.1.1'
+    implementation 'com.pedropathing.ivy:pedro:1.1.1'
 
-    if (usePedro || useAutoTune || usePanels) {
-        implementation platform('org.jetbrains.kotlin:kotlin-bom:2.4.10')
-    }
+    // Panels dashboard (http://192.168.43.1:8001 on robot Wi-Fi)
+    implementation 'com.bylazar:fullpanels:1.0.12'
 
+    // Keeps Kotlin standard library versions aligned across the libraries above
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:2.4.10')
+
+    // Lumière robot library (live data in the app) and desktop simulator (tests only, never installed on the robot)
     implementation 'com.github.Dillylol.Lumiere:ftc-lib:v0.1.2'
-    if (useSimulator) {
-        testImplementation 'com.github.Dillylol.Lumiere:sim:v0.1.2'
-        testImplementation 'junit:junit:4.13.2'
-    }
+    testImplementation 'com.github.Dillylol.Lumiere:sim:v0.1.2'
+    testImplementation 'junit:junit:4.13.2'
 }
