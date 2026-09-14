@@ -1,0 +1,59 @@
+// Lumière dependency catalog. Libraries are downloaded from their official repositories; no
+// third-party or Lumière implementation source is copied into TeamCode.
+
+def feature = { String name, boolean fallback ->
+    providers.gradleProperty(name).map { it.toBoolean() }.getOrElse(fallback)
+}
+
+def usePedro = feature('lumiere.pedro', true)
+def useAutoTune = feature('lumiere.autotune', false)
+def usePanels = feature('lumiere.panels', false)
+def useSimulator = feature('lumiere.simulator', true)
+
+repositories {
+    mavenCentral()
+    google()
+    maven { url = 'https://jitpack.io' }
+    if (useAutoTune) maven { url = 'https://repo.dairy.foundation/releases/' }
+    if (usePanels) maven { url = 'https://mymaven.bylazar.com/releases' }
+}
+
+if (usePanels) {
+    // Panels uses Android 14 APIs at compile time. The FTC minSdk and targetSdk stay unchanged.
+    android.compileSdkVersion 34
+}
+
+android {
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            ['sim.port', 'sim.config'].each { key ->
+                if (project.hasProperty(key)) systemProperty key, project.property(key)
+            }
+            if (project.hasProperty('sim.port')) {
+                outputs.upToDateWhen { false }
+                testLogging.showStandardStreams = true
+            }
+        }
+    }
+}
+
+dependencies {
+    if (usePedro) {
+        implementation 'com.pedropathing:revhub:3.0.0'
+        implementation 'com.pedropathing.ivy:core:1.1.1'
+        implementation 'com.pedropathing.ivy:pedro:1.1.1'
+    }
+    if (useAutoTune) implementation 'com.pedropathing:tuning:1.0.0'
+    if (usePanels) implementation 'com.bylazar:fullpanels:1.0.12'
+
+    if (usePedro || useAutoTune || usePanels) {
+        implementation platform('org.jetbrains.kotlin:kotlin-bom:2.4.10')
+    }
+
+    implementation 'com.github.Dillylol.Lumiere:ftc-lib:v0.1.2'
+    if (useSimulator) {
+        testImplementation 'com.github.Dillylol.Lumiere:sim:v0.1.2'
+        testImplementation 'junit:junit:4.13.2'
+    }
+}
